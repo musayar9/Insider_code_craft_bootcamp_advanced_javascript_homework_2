@@ -23,9 +23,6 @@
     if (typeof jQuery === "undefined") {
       await loadScript("https://code.jquery.com/jquery-3.7.1.min.js");
     }
-    // await loadScript(
-    //   "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/js/all.min.js"
-    // );
 
     await loadCSS(
       "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
@@ -33,7 +30,7 @@
 
     $("head").append(`
       <style>
-          /* Reset and Box Sizing */
+      
 *,
 ::after,
 ::before {
@@ -42,14 +39,14 @@
   box-sizing: border-box;
 }
 
-/* Root Font Size */
+
 html {
   font-size: 16px;
 }
 
-/* CSS Variables */
+
 :root {
-  /* Grey Colors */
+ 
   --grey-50: #f8fafc;
   --grey-100: #f1f5f9;
   --grey-200: #e2e8f0;
@@ -59,29 +56,29 @@ html {
   --grey-600: #475569;
   --grey-700: #334155;
 
-  /* Primary Colors */
+ 
   --primary-50: #a29dff;
   --primary-100: #645cff;
   --primary-200: #4f39f6;
 
-  /* Green Colors*/
+
   --green-50: #00d492;
   --green-100: #00bc7d;
   --green-200: rgba(48, 209, 88, 0.24);
   --green-300: rgba(42, 173, 75, 0.2);
   --green-400: #30d158; /* DÜZELTİLDİ */
 
-  /* Red Colors*/
+
   --red-50: #ff637e;
   --red-100: #ff2056;
   --red-200: rgba(255, 59, 48, 0.2);
   --red-300: #ff3b30;
 
-  /* Base Colors */
+ 
   --black: #222;
   --white: #ffffff;
 
-  /* Layout */
+
   --backgroundColor: var(--grey-50);
   --borderRadius-50: 0.6rem;
   --borderRadius-100: 1rem;
@@ -91,14 +88,13 @@ html {
   --fixed-width: 1200px;
   --view-width: 90vw;
 
-  /* Shadows */
+
   --shadow-1: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
   --shadow-2: 0 4px 6px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.06);
   --shadow-3: 0 10px 15px rgba(0, 0, 0, 0.1), 0 4px 6px rgba(0, 0, 0, 0.05);
   --shadow-4: 0 20px 25px rgba(0, 0, 0, 0.1), 0 10px 10px rgba(0, 0, 0, 0.04);
 }
 
-/* Base Body */
 body {
   background: var(--backgroundColor);
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
@@ -112,7 +108,7 @@ body {
   position: relative;
 }
 
-/* Typography */
+
 p {
   margin: 0;
 }
@@ -142,7 +138,7 @@ ul {
   list-style: none;
 }
 
-/*users list style*/
+
 .ins-api-users {
   display: flex;
   align-items: center;
@@ -158,7 +154,7 @@ ul {
   gap: 1rem;
 }
 
-/*user-card styles*/
+
 .ins-user-card {
   background-color: white;
   border-radius: var(--borderRadius-50);
@@ -254,7 +250,7 @@ gap: 1rem;
 }
 
 
-/*delete button styles*/
+
 .ins-delete-user {
   position: absolute;
   top: 1rem;
@@ -283,7 +279,7 @@ gap: 1rem;
   color: var(--red-100);
   transition: var(--transition);
 }
-/*toastify message styles*/
+
 .message {
   position: fixed;
   top: 5rem;
@@ -306,7 +302,7 @@ gap: 1rem;
     padding-right: 0.4rem;
 }
 
-/*error content styles*/
+
 .ins-error-content {
   margin: 4rem auto;
   display: flex;
@@ -381,7 +377,7 @@ transform: translateY(-4px);
  
 }
 
-/* Loading Spinner */
+
 .loading-spinner {
   display: none;
   color: var(--green-100);
@@ -407,7 +403,7 @@ transform: translateY(-4px);
   padding: 1rem 0;
 }
 
-/*responsive design*/
+
 
 @media screen and (min-width: 992px) {
   .container h1 {
@@ -423,11 +419,264 @@ transform: translateY(-4px);
     `);
 
     $("body").html(``);
+
+    const expiresDate = new Date().setHours(new Date().getHours() + 24);
+    
     const $appendLocation = $("<div></div>")
       .addClass("ins-api-users")
       .attr("id", "ins-location");
     $("body").append($appendLocation);
 
+    const nowDate = new Date().getTime();
+    let isLoading = false;
+
+    $("<h1>User List App</h1>")
+      .addClass("ins-page-title")
+      .insertBefore($appendLocation);
+
+    const config = {
+      attributes: true,
+      childList: true,
+    };
+
+    function controllerMutationObserver() {
+      const $insUserContainer = $(".ins-user-container");
+
+      const observer = new MutationObserver((mutations) => {
+        const $isUserCard = $insUserContainer.find(".ins-user-card");
+
+        if ($isUserCard.length === 0) {
+          deletedAllUser();
+          observer.disconnect()
+        }
+      });
+
+      observer.observe($appendLocation[0], config);
+    }
+
+    getData();
+
+    function getData() {
+      let users = JSON.parse(localStorage.getItem("users"));
+      if (users?.data.length > 0) {
+        if (nowDate < users.expiresDate) {
+          addUserToList(users.data);
+        } else {
+          fetchUsers();
+        }
+      } else {
+        fetchUsers();
+      }
+    }
+    async function fetchUsers() {
+      try {
+        isLoading = true;
+        loading();
+        const res = await fetch("https://jsonplaceholder.typicode.com/users");
+        const data = await res.json();
+
+        if (res.status === 404) {
+          throw new Error("404 Not Found");
+        } else if (res.status === 500) {
+          throw new Error("500 Internal Server Error");
+        } else {
+          localStorage.setItem(
+            "users",
+            JSON.stringify({
+              data,
+              expiresDate,
+            })
+          );
+
+          addUserToList(data);
+        }
+      } catch (error) {
+        errorMessage(error);
+      } finally {
+        isLoading = false;
+        loading();
+      }
+    }
+
+    function loading() {
+      if (isLoading) {
+        let loadingSpin = ` <div class="loading-spinner" id="loading">
+          <div class="spinner-animation"></div>
+          <p>Loading...</p>
+      </div>`;
+        $("body").append(loadingSpin);
+      } else {
+        $("#loading").remove();
+      }
+    }
+
+    function addUserToList(data) {
+      let $insUserContainer = $("<div class='ins-user-container'></div>");
+      let html = "";
+      data.forEach(function (user) {
+        html += `<div class="ins-user-card" data-id=${
+          user.id
+        } aria-label="user-card">
+                     <div class="ins-card-content">
+            
+                          <p class="ins-name-initials">${getUserName(
+                            user?.name
+                          )}</p>
+                          <div class="ins-card-info">
+                              <p class="ins-user-name">${user.name}</p>
+                              <p class="ins-user-email"><i class="fa-solid fa-envelope"></i> <span>${
+                                user.email
+                              }</span></p>
+                              <p class="ins-user-phone"><i class="fa-solid fa-phone"></i><span>${
+                                user.phone
+                              }</span></p>
+                           </div>
+                          <button class="ins-delete-user" data-id=${
+                            user.id
+                          }><i class="fa-solid fa-trash"></i></button>
+                     </div>
+                   <div class="ins-user-detail">
+                              <i class="fa-solid fa-location-dot ins-user-detail-active"></i>
+                              <i class="fa-solid fa-building"></i>
+                              <i class="fa-solid fa-globe"></i>
+                   </div>
+                  <div class="ins-user-detail-content">
+                           <p class="ins-user-address">${user.address.city} / ${
+          user.address.street
+        }</p>
+                           <p class="ins-user-company"><span>${
+                             user.company.name
+                           } </span><br><span>${
+          user.company.catchPhrase
+        }</span></p>
+                           <p class="ins-user-website">${user.website}</p>
+                   </div>
+              
+                </div>`;
+      });
+      $insUserContainer.append(html);
+      $appendLocation.append($insUserContainer);
+
+      controllerMutationObserver();
+    }
+
+    $(document).on("mouseover", ".ins-user-detail i", function () {
+      const $icon = $(this);
+      const $cardItem = $icon.closest(".ins-user-card");
+      const detailContent = $cardItem.find(".ins-user-detail-content");
+      detailContent.find("p").slideUp();
+
+      if ($icon.hasClass("fa-location-dot")) {
+        $cardItem.find(".ins-user-address").stop(true, true).slideDown();
+      } else if ($icon.hasClass("fa-building")) {
+        $cardItem.find(".ins-user-company").stop(true, true).slideDown();
+      } else if ($icon.hasClass("fa-globe")) {
+        $cardItem.find(".ins-user-website").stop(true, true).slideDown();
+      }
+
+      $cardItem
+        .find(".ins-user-detail i")
+        .removeClass("ins-user-detail-active");
+      $icon.addClass("ins-user-detail-active");
+    });
+
+    $(document).on("click", ".ins-delete-user", function () {
+      const userId = $(this).data("id");
+
+      let users = JSON.parse(localStorage.getItem("users") || []);
+      const findUser = users?.data.find((user) => user.id === userId);
+      const updateUser = users?.data.filter((user) => user.id !== userId);
+
+      localStorage.setItem(
+        "users",
+        JSON.stringify({
+          data: updateUser,
+          expiresDate: users?.expiresDate,
+        })
+      );
+
+      $(this)
+        .closest(".ins-user-card")
+        .fadeOut(200, function () {
+          $(this).remove();
+        });
+
+      successMessageToastify(
+        `${findUser.name || "User"} was removed from the user list`
+      );
+    });
+
+    function deletedAllUser() {
+      let isRefresh = sessionStorage.getItem("isRefresh") || false;
+      const deleteCard = `<div class="ins-not-user" id="ins-not-userId">
+    <i class="fa-solid fa-circle-exclamation"></i>
+    <p class="ins-not-user-message">All users were removed from the list.</p>
+    ${
+      !isRefresh
+        ? `
+      <button class="ins-not-user-button">
+        <i class="fa-solid fa-arrow-rotate-left"></i>
+        <span>Refresh</span>
+      </button>
+    `
+        : ""
+    }
+  </div>`;
+
+      $($appendLocation).append(deleteCard).fadeIn(100);
+      $(".ins-user-container").remove();
+    }
+
+    $(document).on("click", ".ins-not-user-button", function () {
+      $("#ins-not-userId").remove();
+      sessionStorage.setItem("isRefresh", true);
+      fetchUsers();
+    });
+
+    function getUserName(username) {
+      const value =
+        username.split(" ")[0].charAt().toUpperCase() +
+        username.split(" ")[1].charAt().toUpperCase();
+      return value;
+    }
+
+    function successMessageToastify(message) {
+      $(".message").remove();
+
+      const div = $("<div></div>");
+      const icons = $("<i></i>").addClass("fa-solid fa-check");
+      div
+        .addClass("message success-message")
+        .hide()
+        .text(message)
+        .prependTo($appendLocation)
+        .fadeIn(500);
+
+      icons.prependTo(".success-message");
+      setTimeout(function () {
+        $(".success-message").fadeOut(500, function () {
+          $(this).remove();
+        });
+      }, 5000);
+    }
+
+    function errorMessage(message) {
+      const div = $("<div></div>").addClass("ins-error-content");
+      const p = $("<p></p>").text(message).addClass("ins-error-message");
+      const img = $("<img/>")
+        .addClass("ins-error-image")
+        .attr(
+          "src",
+          "https://media.istockphoto.com/id/1095047472/vector/error-page-dead-emoji-illustration.jpg?s=612x612&w=0&k=20&c=mEAErA572V--tYXvGYaNcclA17boFY8S8UwIgOgCZek="
+        )
+        .attr("alt", "error-image");
+
+      div.append(p);
+      p.before(img);
+      $(".ins-page-title").remove();
+      $appendLocation.remove();
+      $("body").append(div).css("backgroundColor", "white");
+    }
   } catch (err) {
     console.log("err", err);
     alert(err);
