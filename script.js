@@ -682,7 +682,7 @@ transform: translateY(-4px);
       p.before(img);
       $(".ins-page-title").remove();
       $appendLocation.remove();
- 
+
       $("body").append(div).css("backgroundColor", "white");
     };
 

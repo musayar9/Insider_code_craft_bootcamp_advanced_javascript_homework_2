@@ -1,6 +1,6 @@
 # Kullanıcı Listesi Uygulaması (User List App)
 
-## Demo : [Uygulama Demosu](https://user-list-app-1.netlify.app/)
+## Demo : [Uygulama Demosu](https://user-list-app-v2.netlify.app/)
 
 Bu proje, **HTML**, **CSS**, **JavaScript** ve **jQuery** kullanarak geliştirdiğim basit bir kullanıcı listeleme uygulamasıdır. Uygulama, [JSONPlaceholder API](https://jsonplaceholder.typicode.com/users) üzerinden sahte kullanıcı verilerini çekmekte ve bu verileri kartlar şeklinde kullanıcı arayüzünde listelemektedir. Uygulamada kullanıcı kartlarını (`.ins-user-card`) **MutationObserver** ile takip ediyorum. Amacım, tüm kullanıcılar tamamen silindiğinde bunu algılayıp, kullanıcıya bir **Yenile (Refresh)** butonu göstermek.
 
