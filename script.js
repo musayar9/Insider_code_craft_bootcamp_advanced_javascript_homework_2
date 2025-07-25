@@ -593,12 +593,12 @@ transform: translateY(-4px);
         localStorage.getItem("users") || JSON.stringify({ data: [] })
       );
       const findUser = users?.data.find((user) => user?.id === userId);
-      const updateUser = users?.data.filter((user) => user?.id !== userId);
-
+      
       if (findUser === undefined) {
         errorMessage("User Not Found!");
         return
       }
+      const updateUser = users?.data.filter((user) => user?.id !== userId);
 
       localStorage.setItem(
         "users",
