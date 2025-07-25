@@ -421,7 +421,7 @@ transform: translateY(-4px);
     $("body").html(``);
 
     const expiresDate = new Date().setHours(new Date().getHours() + 24);
-    
+
     const $appendLocation = $("<div></div>")
       .addClass("ins-api-users")
       .attr("id", "ins-location");
@@ -444,19 +444,22 @@ transform: translateY(-4px);
 
       const observer = new MutationObserver((mutations) => {
         const $isUserCard = $insUserContainer.find(".ins-user-card");
-
-        if ($isUserCard.length === 0) {
-          deletedAllUser();
-          observer.disconnect()
+        if ($insUserContainer.length === 0) {
+          console.warn("MutationObserver: '.ins-user-container' not found.");
+          return;
         }
+        mutations.forEach((mutation) => {
+          if (mutation.type === "childList" && $isUserCard.length === 0) {
+            refreshButton();
+            observer.disconnect();
+          }
+        });
       });
 
-      observer.observe($appendLocation[0], config);
+      observer.observe($insUserContainer[0], config);
     }
 
-    getData();
-
-    function getData() {
+    const getData = () => {
       let users = JSON.parse(localStorage.getItem("users"));
       if (users?.data.length > 0) {
         if (nowDate < users.expiresDate) {
@@ -467,8 +470,9 @@ transform: translateY(-4px);
       } else {
         fetchUsers();
       }
-    }
-    async function fetchUsers() {
+    };
+
+    const fetchUsers = async () => {
       try {
         isLoading = true;
         loading();
@@ -491,14 +495,15 @@ transform: translateY(-4px);
           addUserToList(data);
         }
       } catch (error) {
+        console.log("error", error);
         errorMessage(error);
       } finally {
         isLoading = false;
         loading();
       }
-    }
+    };
 
-    function loading() {
+    const loading = () => {
       if (isLoading) {
         let loadingSpin = ` <div class="loading-spinner" id="loading">
           <div class="spinner-animation"></div>
@@ -508,9 +513,9 @@ transform: translateY(-4px);
       } else {
         $("#loading").remove();
       }
-    }
+    };
 
-    function addUserToList(data) {
+    const addUserToList = (data) => {
       let $insUserContainer = $("<div class='ins-user-container'></div>");
       let html = "";
       data.forEach(function (user) {
@@ -558,7 +563,7 @@ transform: translateY(-4px);
       $appendLocation.append($insUserContainer);
 
       controllerMutationObserver();
-    }
+    };
 
     $(document).on("mouseover", ".ins-user-detail i", function () {
       const $icon = $(this);
@@ -583,9 +588,11 @@ transform: translateY(-4px);
     $(document).on("click", ".ins-delete-user", function () {
       const userId = $(this).data("id");
 
-      let users = JSON.parse(localStorage.getItem("users") || []);
-      const findUser = users?.data.find((user) => user.id === userId);
-      const updateUser = users?.data.filter((user) => user.id !== userId);
+      let users = JSON.parse(
+        localStorage.getItem("users") || JSON.stringify({ data: [] })
+      );
+      const findUser = users?.data.find((user) => user?.id === userId);
+      const updateUser = users?.data.filter((user) => user?.id !== userId);
 
       localStorage.setItem(
         "users",
@@ -602,11 +609,11 @@ transform: translateY(-4px);
         });
 
       successMessageToastify(
-        `${findUser.name || "User"} was removed from the user list`
+        `${findUser?.name || "User"} was removed from the user list`
       );
     });
 
-    function deletedAllUser() {
+    const refreshButton = () => {
       let isRefresh = sessionStorage.getItem("isRefresh") || false;
       const deleteCard = `<div class="ins-not-user" id="ins-not-userId">
     <i class="fa-solid fa-circle-exclamation"></i>
@@ -625,7 +632,7 @@ transform: translateY(-4px);
 
       $($appendLocation).append(deleteCard).fadeIn(100);
       $(".ins-user-container").remove();
-    }
+    };
 
     $(document).on("click", ".ins-not-user-button", function () {
       $("#ins-not-userId").remove();
@@ -633,14 +640,14 @@ transform: translateY(-4px);
       fetchUsers();
     });
 
-    function getUserName(username) {
+    const getUserName = (username) => {
       const value =
         username.split(" ")[0].charAt().toUpperCase() +
         username.split(" ")[1].charAt().toUpperCase();
       return value;
-    }
+    };
 
-    function successMessageToastify(message) {
+    const successMessageToastify = (message) => {
       $(".message").remove();
 
       const div = $("<div></div>");
@@ -657,10 +664,10 @@ transform: translateY(-4px);
         $(".success-message").fadeOut(500, function () {
           $(this).remove();
         });
-      }, 5000);
-    }
+      }, 3000);
+    };
 
-    function errorMessage(message) {
+    const errorMessage = (message) => {
       const div = $("<div></div>").addClass("ins-error-content");
       const p = $("<p></p>").text(message).addClass("ins-error-message");
       const img = $("<img/>")
@@ -675,8 +682,11 @@ transform: translateY(-4px);
       p.before(img);
       $(".ins-page-title").remove();
       $appendLocation.remove();
+ 
       $("body").append(div).css("backgroundColor", "white");
-    }
+    };
+
+    getData();
   } catch (err) {
     console.log("err", err);
     alert(err);
