@@ -446,7 +446,7 @@ transform: translateY(-4px);
         const $isUserCard = $insUserContainer.find(".ins-user-card");
         if ($insUserContainer.length === 0) {
           console.log("MutationObserver: data is not found.");
-          errorMessage("MutationObserver: Data is not found.");
+          errorMessage("MutationObserver: Data is not found!");
           return;
         }
         mutations.forEach((mutation) => {
@@ -596,7 +596,7 @@ transform: translateY(-4px);
       const updateUser = users?.data.filter((user) => user?.id !== userId);
 
       if (findUser === undefined) {
-        errorMessage("User Not Found");
+        errorMessage("User Not Found!");
         return
       }
 
