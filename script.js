@@ -445,7 +445,8 @@ transform: translateY(-4px);
       const observer = new MutationObserver((mutations) => {
         const $isUserCard = $insUserContainer.find(".ins-user-card");
         if ($insUserContainer.length === 0) {
-          console.warn("MutationObserver: '.ins-user-container' not found.");
+          console.log("MutationObserver: data is not found.");
+          errorMessage("MutationObserver: Data is not found.");
           return;
         }
         mutations.forEach((mutation) => {
@@ -593,6 +594,11 @@ transform: translateY(-4px);
       );
       const findUser = users?.data.find((user) => user?.id === userId);
       const updateUser = users?.data.filter((user) => user?.id !== userId);
+
+      if (findUser === undefined) {
+        errorMessage("User Not Found");
+        return
+      }
 
       localStorage.setItem(
         "users",

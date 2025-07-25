@@ -22,11 +22,10 @@ Bu proje, **HTML**, **CSS**, **JavaScript** ve **jQuery** kullanarak geliştirdi
 - Silinen kullanıcı arayüzden (UI) kaldırılır.
 - Aynı zamanda `localStorage`’dan da silinir.
 
-- Kullanıcılar tamamen silindiğinde ekranda bu buton beliriyor.
+- Kullanıcılar tamamen silindiğinde ekranda bir buton ve bilgilendirme mesajı gösteriliyor.
 - Kullanıcı butona tıkladığında API’den kullanıcı verileri yeniden çekiliyor ve liste güncelleniyor.
 - Butonun bir oturum (session) içinde yalnızca **bir kez** kullanılabilmesi için, butona tıklandığında `sessionStorage` içine `isRefresh` adlı bir kayıt ekliyorum.
 - Böylece aynı oturumda kullanıcı yenileme işlemini yaptıktan sonra, eğer tekrar tüm kullanıcıları silerse, yenileme butonu tekrar gösterilmiyor.
-- Ekrana bilgilendirici bir mesaj gösterilir.
 
 - Veri çekme sırasında hata oluşursa, `catch` bloğu ile yakalanır ve kullanıcıya ekran üzerinde hata mesajı gösterilir.
 - İlk veri çekme aşamasında, kullanıcıya yükleniyor animasyonu gösterilir.
