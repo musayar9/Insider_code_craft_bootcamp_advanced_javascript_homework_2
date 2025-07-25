@@ -593,10 +593,10 @@ transform: translateY(-4px);
         localStorage.getItem("users") || JSON.stringify({ data: [] })
       );
       const findUser = users?.data.find((user) => user?.id === userId);
-      
+
       if (findUser === undefined) {
         errorMessage("User Not Found!");
-        return
+        return;
       }
       const updateUser = users?.data.filter((user) => user?.id !== userId);
 
@@ -643,6 +643,7 @@ transform: translateY(-4px);
     $(document).on("click", ".ins-not-user-button", function () {
       $("#ins-not-userId").remove();
       sessionStorage.setItem("isRefresh", true);
+      successMessageToastify("The page was refreshed.")
       fetchUsers();
     });
 
@@ -674,6 +675,7 @@ transform: translateY(-4px);
     };
 
     const errorMessage = (message) => {
+      $(".ins-error-content").remove();
       const div = $("<div></div>").addClass("ins-error-content");
       const p = $("<p></p>").text(message).addClass("ins-error-message");
       const img = $("<img/>")
